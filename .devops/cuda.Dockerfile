@@ -1,4 +1,4 @@
-ARG UBUNTU_VERSION=24.04
+ARG UBUNTU_VERSION=22.04
 # This needs to generally match the container host's environment.
 ARG CUDA_VERSION=12.8.1
 # Target the CUDA build image
