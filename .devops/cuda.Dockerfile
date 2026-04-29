@@ -12,9 +12,9 @@ FROM ${BASE_CUDA_DEV_CONTAINER} AS build
 ARG CUDA_DOCKER_ARCH=default
 
 RUN apt-get update && \
-    apt-get install -y gcc-14 g++-14 build-essential cmake python3 python3-pip git libssl-dev libgomp1
+    apt-get install -y gcc-12 g++-12 build-essential cmake python3 python3-pip git libssl-dev libgomp1
 
-ENV CC=gcc-14 CXX=g++-14 CUDAHOSTCXX=g++-14
+ENV CC=gcc-12 CXX=g++-12 CUDAHOSTCXX=g++-12
 
 WORKDIR /app
 
