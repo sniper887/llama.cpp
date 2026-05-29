@@ -14,10 +14,13 @@ We have three Docker images available for this project:
 Additionally, there the following images, similar to the above:
 
 - `ghcr.io/ggml-org/llama.cpp:full-cuda`: Same as `full` but compiled with CUDA 12 support. (platforms: `linux/amd64`, `linux/arm64`)
+- `ghcr.io/ggml-org/llama.cpp:full-cuda12`: Same as `full` but compiled with CUDA 12.4 support. (platforms: `linux/amd64`)
 - `ghcr.io/ggml-org/llama.cpp:full-cuda13`: Same as `full` but compiled with CUDA 13 support. (platforms: `linux/amd64`, `linux/arm64`)
 - `ghcr.io/ggml-org/llama.cpp:light-cuda`: Same as `light` but compiled with CUDA 12 support. (platforms: `linux/amd64`, `linux/arm64`)
+- `ghcr.io/ggml-org/llama.cpp:light-cuda12`: Same as `light` but compiled with CUDA 12.4 support. (platforms: `linux/amd64`)
 - `ghcr.io/ggml-org/llama.cpp:light-cuda13`: Same as `light` but compiled with CUDA 13 support. (platforms: `linux/amd64`, `linux/arm64`)
 - `ghcr.io/ggml-org/llama.cpp:server-cuda`: Same as `server` but compiled with CUDA 12 support. (platforms: `linux/amd64`, `linux/arm64`)
+- `ghcr.io/ggml-org/llama.cpp:server-cuda12`: Same as `server` but compiled with CUDA 12.4 support. (platforms: `linux/amd64`)
 - `ghcr.io/ggml-org/llama.cpp:server-cuda13`: Same as `server` but compiled with CUDA 13 support. (platforms: `linux/amd64`, `linux/arm64`)
 - `ghcr.io/ggml-org/llama.cpp:full-rocm`: Same as `full` but compiled with ROCm support. (platforms: `linux/amd64`)
 - `ghcr.io/ggml-org/llama.cpp:light-rocm`: Same as `light` but compiled with ROCm support. (platforms: `linux/amd64`)
