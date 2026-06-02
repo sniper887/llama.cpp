@@ -1,0 +1,123 @@
+name: Build CUDA 13.0 for Ubuntu 26.04 (P100)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+    paths:
+      - '.github/workflows/build-cuda13-ubuntu26.yml'
+      - '**/*.h'
+      - '**/*.cpp'
+      - '**/*.cu'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref && github.ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    container: nvidia/cuda:13.0.1-devel-ubuntu22.04
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Install dependencies
+        run: |
+          apt update && apt install -y \
+            cmake build-essential ninja-build libgomp1 git libssl-dev \
+            zip tar gzip
+
+      - name: Build with CMake (P100 optimized)
+        run: |
+          cmake -S . -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_CUDA_ARCHITECTURES=60 \
+            -DCMAKE_EXE_LINKER_FLAGS=-Wl,--allow-shlib-undefined \
+            -DGGML_NATIVE=OFF \
+            -DGGML_CUDA=ON \
+            -DGGML_CUDA_CUB_3DOT2=ON \
+            -DGGML_BACKEND_DL=ON \
+            -DLLAMA_BUILD_TESTS=OFF
+          cmake --build build -j$(nproc)
+
+      - name: Package build artifacts
+        run: |
+          mkdir -p llama.cpp-cuda13-p100-ubuntu26/bin
+          mkdir -p llama.cpp-cuda13-p100-ubuntu26/lib
+          mkdir -p llama.cpp-cuda13-p100-ubuntu26/share
+          
+          cp build/bin/llama-cli llama.cpp-cuda13-p100-ubuntu26/bin/
+          cp build/bin/llama-server llama.cpp-cuda13-p100-ubuntu26/bin/
+          cp build/bin/llama-convert llama.cpp-cuda13-p100-ubuntu26/bin/
+          cp build/bin/llama-bench llama.cpp-cuda13-p100-ubuntu26/bin/
+          
+          cp build/lib/*.so* llama.cpp-cuda13-p100-ubuntu26/lib/ 2>/dev/null || true
+          cp build/bin/*.so* llama.cpp-cuda13-p100-ubuntu26/lib/ 2>/dev/null || true
+          
+          cp -r examples llama.cpp-cuda13-p100-ubuntu26/share/ 2>/dev/null || true
+          cp README.md llama.cpp-cuda13-p100-ubuntu26/
+          
+          tar -czvf llama.cpp-cuda13-p100-ubuntu26.tar.gz llama.cpp-cuda13-p100-ubuntu26/
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: llama.cpp-cuda13-p100-ubuntu26
+          path: llama.cpp-cuda13-p100-ubuntu26.tar.gz
+
+  release:
+    needs: build
+    runs-on: ubuntu-24.04
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: llama.cpp-cuda13-p100-ubuntu26
+      
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: cuda13-p100-ubuntu26-${{ github.run_id }}
+          release_name: CUDA 13.0 for Ubuntu 26.04 (P100)
+          body: |
+            llama.cpp build for Ubuntu 26.04 x86_64 with CUDA 13.0 support, optimized for P100 GPUs.
+            
+            **Environment:**
+            - Ubuntu 26.04 x86_64
+            - CUDA 13.0.1
+            - P100 GPU (sm_60)
+            
+            **Binaries included:**
+            - llama-cli
+            - llama-server
+            - llama-convert
+            - llama-bench
+            
+            **Installation:**
+            ```bash
+            tar -xzf llama.cpp-cuda13-p100-ubuntu26.tar.gz
+            cd llama.cpp-cuda13-p100-ubuntu26
+            sudo cp bin/* /usr/local/bin/
+            sudo cp lib/* /usr/local/lib/
+            sudo ldconfig
+            ```
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./llama.cpp-cuda13-p100-ubuntu26.tar.gz
+          asset_name: llama.cpp-cuda13-p100-ubuntu26.tar.gz
+          asset_content_type: application/gzip
