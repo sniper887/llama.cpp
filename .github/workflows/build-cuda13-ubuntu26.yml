@@ -1,4 +1,4 @@
-name: Build CUDA 13.0 for Ubuntu 26.04 (P100)
+name: Build CUDA 12.x for Ubuntu 26.04 (P100)
 
 on:
   workflow_dispatch:
@@ -18,7 +18,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-24.04
-    container: nvidia/cuda:13.0.1-devel-ubuntu22.04
+    container: nvidia/cuda:12.6.2-devel-ubuntu22.04
 
     steps:
       - name: Checkout code
@@ -45,28 +45,28 @@ jobs:
 
       - name: Package build artifacts
         run: |
-          mkdir -p llama.cpp-cuda13-p100-ubuntu26/bin
-          mkdir -p llama.cpp-cuda13-p100-ubuntu26/lib
-          mkdir -p llama.cpp-cuda13-p100-ubuntu26/share
+          mkdir -p llama.cpp-cuda12-p100-ubuntu26/bin
+          mkdir -p llama.cpp-cuda12-p100-ubuntu26/lib
+          mkdir -p llama.cpp-cuda12-p100-ubuntu26/share
           
-          cp build/bin/llama-cli llama.cpp-cuda13-p100-ubuntu26/bin/
-          cp build/bin/llama-server llama.cpp-cuda13-p100-ubuntu26/bin/
-          cp build/bin/llama-convert llama.cpp-cuda13-p100-ubuntu26/bin/
-          cp build/bin/llama-bench llama.cpp-cuda13-p100-ubuntu26/bin/
+          cp build/bin/llama-cli llama.cpp-cuda12-p100-ubuntu26/bin/
+          cp build/bin/llama-server llama.cpp-cuda12-p100-ubuntu26/bin/
+          cp build/bin/llama-convert llama.cpp-cuda12-p100-ubuntu26/bin/
+          cp build/bin/llama-bench llama.cpp-cuda12-p100-ubuntu26/bin/
           
-          cp build/lib/*.so* llama.cpp-cuda13-p100-ubuntu26/lib/ 2>/dev/null || true
-          cp build/bin/*.so* llama.cpp-cuda13-p100-ubuntu26/lib/ 2>/dev/null || true
+          cp build/lib/*.so* llama.cpp-cuda12-p100-ubuntu26/lib/ 2>/dev/null || true
+          cp build/bin/*.so* llama.cpp-cuda12-p100-ubuntu26/lib/ 2>/dev/null || true
           
-          cp -r examples llama.cpp-cuda13-p100-ubuntu26/share/ 2>/dev/null || true
-          cp README.md llama.cpp-cuda13-p100-ubuntu26/
+          cp -r examples llama.cpp-cuda12-p100-ubuntu26/share/ 2>/dev/null || true
+          cp README.md llama.cpp-cuda12-p100-ubuntu26/
           
-          tar -czvf llama.cpp-cuda13-p100-ubuntu26.tar.gz llama.cpp-cuda13-p100-ubuntu26/
+          tar -czvf llama.cpp-cuda12-p100-ubuntu26.tar.gz llama.cpp-cuda12-p100-ubuntu26/
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: llama.cpp-cuda13-p100-ubuntu26
-          path: llama.cpp-cuda13-p100-ubuntu26.tar.gz
+          name: llama.cpp-cuda12-p100-ubuntu26
+          path: llama.cpp-cuda12-p100-ubuntu26.tar.gz
 
   release:
     needs: build
@@ -77,7 +77,7 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          name: llama.cpp-cuda13-p100-ubuntu26
+          name: llama.cpp-cuda12-p100-ubuntu26
       
       - name: Create Release
         id: create_release
@@ -85,14 +85,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: cuda13-p100-ubuntu26-${{ github.run_id }}
-          release_name: CUDA 13.0 for Ubuntu 26.04 (P100)
+          tag_name: cuda12-p100-ubuntu26-${{ github.run_id }}
+          release_name: CUDA 12.6 for Ubuntu 26.04 (P100)
           body: |
-            llama.cpp build for Ubuntu 26.04 x86_64 with CUDA 13.0 support, optimized for P100 GPUs.
+            llama.cpp build for Ubuntu 26.04 x86_64 with CUDA 12.6 support, optimized for P100 GPUs.
             
             **Environment:**
             - Ubuntu 26.04 x86_64
-            - CUDA 13.0.1
+            - CUDA 12.6.2
             - P100 GPU (sm_60)
             
             **Binaries included:**
@@ -103,8 +103,8 @@ jobs:
             
             **Installation:**
             ```bash
-            tar -xzf llama.cpp-cuda13-p100-ubuntu26.tar.gz
-            cd llama.cpp-cuda13-p100-ubuntu26
+            tar -xzf llama.cpp-cuda12-p100-ubuntu26.tar.gz
+            cd llama.cpp-cuda12-p100-ubuntu26
             sudo cp bin/* /usr/local/bin/
             sudo cp lib/* /usr/local/lib/
             sudo ldconfig
@@ -118,6 +118,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./llama.cpp-cuda13-p100-ubuntu26.tar.gz
-          asset_name: llama.cpp-cuda13-p100-ubuntu26.tar.gz
+          asset_path: ./llama.cpp-cuda12-p100-ubuntu26.tar.gz
+          asset_name: llama.cpp-cuda12-p100-ubuntu26.tar.gz
           asset_content_type: application/gzip
